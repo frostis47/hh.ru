@@ -8,7 +8,7 @@ class TestHH(unittest.TestCase):
     @patch('requests.get')
     def test_load_vacancies(self, mock_get):
         mock_response = MagicMock()
-        mock_response.status_code = 200  # Установите статус код на 200
+        mock_response.status_code = 200
         mock_response.json.return_value = {
             'items': [
                 {
