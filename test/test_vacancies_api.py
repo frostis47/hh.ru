@@ -1,12 +1,14 @@
+
+
 import unittest
 from unittest.mock import patch, MagicMock
 from src.vacancies_api import HH
-
 
 class TestHH(unittest.TestCase):
     @patch('requests.get')
     def test_load_vacancies(self, mock_get):
         mock_response = MagicMock()
+        mock_response.status_code = 200  # Установите статус код на 200
         mock_response.json.return_value = {
             'items': [
                 {
@@ -41,6 +43,6 @@ class TestHH(unittest.TestCase):
             params={'text': 'Тестировщик комфорта квартир', 'page': 20, 'per_page': 100}
         )
 
-
 if __name__ == '__main__':
     unittest.main()
+
