@@ -1,66 +1,43 @@
-import json
+from src.utils import top_vacancy, filter_vacancy
 
-data = '''{
-    "items": [
-        {
-            "id": "93353083",
-            "premium": false,
-            "name": "Тестировщик комфорта квартир",
-            "area": {
-                "id": "26",
-                "name": "Воронеж"
-            },
-            "salary": {
-                "from": 350000,
-                "to": 450000,
-                "currency": "RUR"
-            },
-            "employer": {
-                "name": "Специализированный застройщик BM GROUP"
-            },
-            "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=93353083",
-            "schedule": {
-                "id": "flexible",
-                "name": "Гибкий график"
-            },
-            "responsibility": "Оценивать вид из окна: встречать рассветы на кухне, и провожать алые закаты в спальне."
+my_list = [
+    {
+        "name": "Программист Python(Middle)",
+        "city": "Москва",
+        "salary": {
+            "from": 100000,
+            "to": 200000
         },
-        {
-            "id": "92223756",
-            "premium": false,
-            "name": "Удаленный диспетчер чатов (в Яндекс)",
-            "area": {
-                "id": "113",
-                "name": "Москва"
-            },
-            "employer": {
-                "name": "Яндекс"
-            },
-            "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=92223756",
-            "schedule": {
-                "id": "flexible",
-                "name": "Гибкий график"
-            },
-            "responsibility": "Обрабатывать входящие чаты и поддерживать клиентов."
-        }
-    ]
-}'''
+        "url": "https://hh.ru/vacancy/108638168",
+        "description": "Отличное понимание Telegram API. Опыт разработки на Python от 2 лет. Уверенное владение Python. Опыт работы с Linux (SSH). "
+    },
+    {
+        "name": "Backend-разработчик / Разработчик Python",
+        "city": "Санкт-Петербург",
+        "salary": {
+            "from": 230000,
+            "to": 0
+        },
+        "url": "https://hh.ru/vacancy/109292967",
+        "description": "Высшее образование в области математики или информатики (магистр или специалист). Уверенное владение Python (либо альтернативными языками и технологиями). "
+    }
+]
+
+def test_top_vacancy():
+    """Тестирование функции выбора топ-n вакансий для пользователя"""
+    assert top_vacancy(number="", my_list=[1, 2, 3]) == [1, 2, 3]
+    assert top_vacancy(number=2, my_list=[1, 2, 3]) == [1, 2]
 
 
-vacancy_data = json.loads(data)
-
-
-for item in vacancy_data['items']:
-    job_title = item['name']
-    location = item['area']['name']
-    employer_name = item['employer']['name']
-    apply_url = item['apply_alternate_url']
-    responsibilities = item.get('responsibility', 'Нет информации о обязанностях')
-
-    # Вывод информации
-    print(f"Название вакансии: {job_title}")
-    print(f"Местоположение: {location}")
-    print(f"Работодатель: {employer_name}")
-    print(f"Ссылка для подачи заявки: {apply_url}")
-    print(f"Обязанности: {responsibilities}")
-    print("-" * 40)
+def test_filter_vacancy():
+    """Тестирование функции фильтрации вакансий по описанию и названию"""
+    assert filter_vacancy(my_list=my_list, words_list=['Разработчик']) == [{
+        "name": "Backend-разработчик / Разработчик Python",
+        "city": "Санкт-Петербург",
+        "salary": {
+            "from": 230000,
+            "to": 0
+        },
+        "url": "https://hh.ru/vacancy/109292967",
+        "description": "Высшее образование в области математики или информатики (магистр или специалист). Уверенное владение Python (либо альтернативными языками и технологиями). "
+    }]
