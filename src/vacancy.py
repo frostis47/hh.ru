@@ -1,15 +1,15 @@
 class Vacancy:
-    """Класс для работы с вакансиями"""
-    __slots__ = ('name', 'city', 'salary', 'result', 'data_base_hh')
-
-    def __init__(self, name, city, salary, data_base_hh):
-        """Инициализатор для класса"""
+    def __init__(self, name, salary_from, salary_to, requirements, city, url):
         self.name = name
+        self.salary_from = salary_from
+        self.salary_to = salary_to
+        self.requirements = requirements
         self.city = city
-        self.salary = salary
-        self.data_base_hh = data_base_hh
-        self.result = []
-        self.__reform_file(self.data_base_hh)
+        self.url = url
+
+    def __repr__(self):
+        return f"Vacancy(name={self.name}, salary_from={self.salary_from}, salary_to={self.salary_to}, requirements={self.requirements}, city={self.city}, url={self.url})"
+
 
     def __reform_file(self, data_hh):
         """Метод для обработки JSON-ответа от сайта HH.ru"""

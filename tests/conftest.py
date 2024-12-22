@@ -5,14 +5,12 @@ from src.vacancy import Vacancy
 with open('tests/data_tests.json', 'r', encoding="utf-8") as file:
     data = json.load(file)
 
-
 @pytest.fixture
 def valid():
     """Фикстура для метода валидации класса HH()"""
-    test_vac = Vacancy('Разработчик', 'Москва', 20000, data)
+    test_vac = Vacancy('Разработчик','Москва',20000,data)
 
     return test_vac
-
 
 @pytest.fixture
 def city():
@@ -20,7 +18,6 @@ def city():
     test_vac = Vacancy('Разработчик', 'Москва', 20000, data)
 
     return test_vac.filter_city()
-
 
 @pytest.fixture
 def difference():
