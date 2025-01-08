@@ -11,8 +11,22 @@ def user_interaction():
     city_search = input("Введите город для поиска вакансии: ")
     hh.load_vacancies(search_query)
     filter_words = input("Введите ключевые слова для фильтрации вакансий: ").split()
-    salary_threshold = int(input("Введите желаемую зарплату: "))
-    top_n = int(input("Введите количество вакансий для вывода в топ N: "))
+
+    # Обработка ввода желаемой зарплаты с проверкой на корректность
+    while True:
+        try:
+            salary_threshold = int(input("Введите желаемую зарплату: "))
+            break
+        except ValueError:
+            print("Пожалуйста, введите корректное целое число для зарплаты.")
+
+    # Обработка ввода количества вакансий для вывода
+    while True:
+        try:
+            top_n = int(input("Введите количество вакансий для вывода в топ N: "))
+            break
+        except ValueError:
+            print("Пожалуйста, введите корректное целое число для количества вакансий.")
 
     # Начнём превращать каждый словарь от API в отдельную вакансию
     vacancy_instances = []
@@ -24,9 +38,9 @@ def user_interaction():
 
         # Обработка зарплаты
         salary = vacancy_info.get('salary')
-        if salary:
-            salary_from = salary.get('from', 0)
-            salary_to = salary.get('to', 0)
+        if salary is not None:
+            salary_from = int(salary.get('from', 0) or 0)
+            salary_to = int(salary.get('to', 0) or 0)
         else:
             salary_from = 0
             salary_to = 0
@@ -67,7 +81,3 @@ def user_interaction():
 
 
 print(user_interaction())
-
-
-
-

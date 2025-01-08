@@ -6,13 +6,15 @@ def top_vacancy(number, my_list):
         return my_list[0:int(number)]
 
 
-def filter_vacancy(my_list, words_list):
-    """Функция фильтрации вакансий по ключевым словам в описании или названия вакансии"""
-    fin_list = []
-    for index in my_list:
-        for i in words_list:
-            if index["description"] is None:
-                continue
-            elif i in index["description"] or i in index["name"]:
-                fin_list.append(index)
-    return fin_list
+def filter_vacancy(vacancies, filter_words):
+    """Фильтрует вакансии по ключевым словам."""
+    filtered_vacancies = []
+
+    for vacancy in vacancies:
+        description = vacancy.requirements
+        name = vacancy.name
+
+        if any(word in description for word in filter_words) or any(word in name for word in filter_words):
+            filtered_vacancies.append(vacancy)
+
+    return filtered_vacancies
