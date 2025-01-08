@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "hh-ru"
+version = "0.1.0"
+description = ""
+authors = ["fr0st <fr0st1s747@gmail.com>"]
+readme = "README.md"
+packages = [{include = "hh"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.32.3"
+pytest = "^8.3.3"
+automium-web = "^0.1.1"
+hh = "^2.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
