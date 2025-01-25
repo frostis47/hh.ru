@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
-
 import json
-import os.path
+import os
 
 
 class JSONVacancy(ABC):
-    """Абстрактный метод для создания и удаления JSON-файлов"""
+    """Абстрактный класс для работы с JSON-файлами вакансий"""
 
     @abstractmethod
     def safe_vacancy(self, stock_list):
@@ -14,12 +13,22 @@ class JSONVacancy(ABC):
 
     @abstractmethod
     def delete_vacancy(self, words_del):
-        """Метод для удаления не нужного файла"""
+        """Метод для удаления ненужных данных из файла"""
+        pass
+
+    @abstractmethod
+    def vacancy_from_file(self, words_sample):
+        """Метод для выборки нужных данных из файла"""
+        pass
+
+    @abstractmethod
+    def full_data_from_file(self):
+        """Метод для получения всех данных из файла"""
         pass
 
 
 class HHVacancy(JSONVacancy):
-    """Класс для создания и удаления файлов с данными по вакансиям из сайта HH.ru"""
+    """Класс для работы с вакансиями с сайта HH.ru"""
 
     def __init__(self, file_name_save='data/suitable_vacancies.json'):
         """Инициализатор класса"""
@@ -30,56 +39,85 @@ class HHVacancy(JSONVacancy):
 
     def safe_vacancy(self, stock_list):
         """Метод для сохранения данных о вакансиях в файл"""
-        if stock_list is None:
+        if not stock_list:
             print("Вакансий с такими критериями не найдено")
-        elif stock_list is not None:
+            return
+
+        try:
+            # Загружаем существующие данные, если файл существует
+            data = []
             if os.path.exists(self.get_file_name()):
                 with open(self.get_file_name(), 'r', encoding="utf-8") as file:
                     data = json.load(file)
-                for i in stock_list:
-                    if i not in data:
-                        data.append(i)
-                with open(self.get_file_name(), 'w', encoding="utf-8") as file:
-                    json.dump(data, file, indent=4,
-                              ensure_ascii=False)
-            else:
-                with open(self.get_file_name(), 'w', encoding="utf-8") as file:
-                    json.dump(stock_list, file, indent=4, ensure_ascii=False)
+
+            for vacancy in stock_list:
+                if vacancy.to_json() not in data:
+                    data.append(vacancy.to_json())
+
+
+            with open(self.get_file_name(), 'w', encoding="utf-8") as file:
+                json.dump(data, file, indent=4, ensure_ascii=False)
+
+        except json.JSONDecodeError:
+            print("Ошибка: файл поврежден или не в формате JSON.")
+        except Exception as e:
+            print(f"Ошибка при сохранении вакансий: {e}")
 
     def delete_vacancy(self, words_del):
-        """Метод для удаления не нужных данных из файла"""
-        data_1 = []
-        if os.path.exists('../data/suitable_vacancies.json'):
+        """Метод для удаления ненужных данных из файла"""
+        if not os.path.exists(self.get_file_name()):
+            return 'Файла с таким названием не существует'
+
+        try:
             with open(self.get_file_name(), 'r', encoding="utf-8") as file:
                 data = json.load(file)
-            for i in data:
-                if words_del != i['city'] and words_del not in i['name'] and words_del not in i['description']:
-                    data_1.append(i)
+
+            filtered_data = [
+                vacancy for vacancy in data
+                if (words_del != vacancy['city'] and
+                    words_del not in vacancy['name'] and
+                    words_del not in vacancy['description'])
+            ]
+
+            # Сохраняем отфильтрованные данные в файл
             with open(self.get_file_name(), 'w', encoding="utf-8") as file:
-                json.dump(data_1, file, indent=4,
-                          ensure_ascii=False)
-            return data_1
-        else:
-            return 'Файла с таким название не существует'
+                json.dump(filtered_data, file, indent=4, ensure_ascii=False)
+
+            return filtered_data
+
+        except Exception as e:
+            return f"Ошибка при удалении вакансий: {e}"
 
     def vacancy_from_file(self, words_sample):
         """Метод для выборки нужных данных из файла"""
-        result_data = []
-        if os.path.exists(self.get_file_name()):
+        if not os.path.exists(self.get_file_name()):
+            return 'Файла с таким названием не существует'
+
+        try:
             with open(self.get_file_name(), 'r', encoding="utf-8") as file:
                 data = json.load(file)
-            for i in data:
-                if words_sample in i["description"] or words_sample == i['name'] or words_sample == i['city']:
-                    result_data.append(i)
+
+            result_data = [
+                vacancy for vacancy in data
+                if (words_sample in vacancy["description"] or
+                    words_sample == vacancy['name'] or
+                    words_sample == vacancy['city'])
+            ]
 
             return result_data
-        else:
-            return 'Файла с таким название не существует'
+
+        except Exception as e:
+            return f"Ошибка при выборке вакансий: {e}"
 
     def full_data_from_file(self):
-        if os.path.exists(self.get_file_name()):
+        """Метод для получения всех данных из файла"""
+        if not os.path.exists(self.get_file_name()):
+            return 'Файла с таким названием не существует'
+
+        try:
             with open(self.get_file_name(), 'r', encoding="utf-8") as file:
                 data = json.load(file)
             return data
-        else:
-            "Файл пуст"
+
+        except Exception as e:
+            return f"Ошибка при получении всех данных: {e}"

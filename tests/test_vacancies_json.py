@@ -1,5 +1,6 @@
 from src.vacancies_json import HHVacancy
 import json
+import os
 
 vacan = [{
     "name": "Middle Python Developer",
@@ -28,33 +29,51 @@ vacan = [{
 def test_save_vacancy():
     """Тестирование метода сохранения данных в файл"""
     test_1 = HHVacancy()
-    res = test_1.safe_vacancy(vacan)
-    ext = None
+    test_1.safe_vacancy(vacan)
+
+
     with open('data/suitable_vacancies.json', 'r', encoding="utf-8") as file:
-        json.load(file)
-    assert res == ext
+        saved_data = json.load(file)
+
+    assert saved_data == vacan
 
 
 def test_delete_vacancy():
     """Тестирование метода удаления из файла данных"""
     test_2 = HHVacancy()
     test_2.safe_vacancy(vacan)
-    result = test_2.delete_vacancy('Санкт-Петербург')
+
+
+    test_2.delete_vacancy('Санкт-Петербург')
+
     with open('data/suitable_vacancies.json', 'r', encoding="utf-8") as file:
         data = json.load(file)
-    assert result == data
+
+
+    assert len(data) == 1
+    assert data[0]['name'] == 'Middle Python Developer'
 
 
 def test_vacancy_from_file():
-    """Тестирование метод получения нужной вакансии"""
+    """Тестирование метода получения нужной вакансии"""
     test_3 = HHVacancy()
     test_3.safe_vacancy(vacan)
+
     result = test_3.vacancy_from_file('Москва')
+
+
     assert result == [vacan[0]]
 
 
 def test_full_data_from_file():
-    """"""
-    test_3 = HHVacancy()
-    test_3.safe_vacancy(vacan)
-    assert test_3.full_data_from_file() == vacan
+    """Тестирование получения всех данных из файла"""
+    test_4 = HHVacancy()
+    test_4.safe_vacancy(vacan)
+
+    assert test_4.full_data_from_file() == vacan
+
+def teardown_module():
+    try:
+        os.remove('data/suitable_vacancies.json')
+    except OSError:
+        pass

@@ -6,6 +6,7 @@ from src.vacancies_api import HH
 class TestHH(unittest.TestCase):
     @patch('requests.get')
     def test_load_vacancies(self, mock_get):
+
         mock_response = MagicMock()
         mock_response.json.return_value = {
             'items': [
@@ -14,10 +15,16 @@ class TestHH(unittest.TestCase):
             ]
         }
         mock_get.return_value = mock_response
+
+
         hh = HH()
         hh.load_vacancies('Python Developer')
+
+
         self.assertGreater(len(hh.vacancies), 0)
         self.assertEqual(hh.vacancies[0]['name'], 'Python Developer')
+
+
         mock_get.assert_called_with(
             'https://api.hh.ru/vacancies',
             headers={'User-Agent': 'HH-User-Agent'},
