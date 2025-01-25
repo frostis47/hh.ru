@@ -25,13 +25,14 @@ my_list = [
 
 def test_top_vacancy():
     """Тестирование функции выбора топ-n вакансий для пользователя"""
-    assert top_vacancy(number="", my_list=[1, 2, 3]) == [1, 2, 3]
-    assert top_vacancy(number=2, my_list=[1, 2, 3]) == [1, 2]
 
-
+    assert top_vacancy(number=3, my_list=my_list) == my_list
+    assert top_vacancy(number=2, my_list=my_list) == my_list[:2]
+    assert top_vacancy(number=1, my_list=my_list) == my_list[:1]
 def test_filter_vacancy():
     """Тестирование функции фильтрации вакансий по описанию и названию"""
-    assert filter_vacancy(my_list=my_list, words_list=['Разработчик']) == [{
+    filtered_vacancies = filter_vacancy(my_list=my_list, words_list=['Разработчик'])
+    assert filtered_vacancies == [{
         "name": "Backend-разработчик / Разработчик Python",
         "city": "Санкт-Петербург",
         "salary": {
