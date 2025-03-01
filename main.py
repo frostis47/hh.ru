@@ -1,97 +1,61 @@
-from src.vacancies_api import HH
+from src.head_hunter_api import HeadHunterAPI
+from src.json_saver import JSONSaver
+from src.user_interaction import filter_vacancies, get_top_vacancies, get_vacancies_by_salary, print_vacancies
 from src.vacancy import Vacancy
-from src.vacancies_json import HHVacancy
-from src.utils import top_vacancy, filter_vacancy
 
 
 def user_interaction():
-    """Функция для взаимодействия с клиентом"""
+    """Функция для взаимодействия с пользователем"""
+
+    # Создание экземпляра класса для работы с API сайтов с вакансиями
+    platforms = HeadHunterAPI()
+
     search_query = input("Введите поисковый запрос: ")
-    city_search = input("Введите город для поиска вакансии: ")
 
-    hh = HH()
-    hh.load_vacancies(search_query)
+    # Получение вакансий с hh.ru в формате JSON
+    hh_vacancies = platforms.load_vacancies(search_query)
 
+    # Преобразование набора данных из JSON в список объектов
+    vacancies_add_list = Vacancy.cast_to_object_list(hh_vacancies)
+
+    # Получение списка вакансий из класса Vacancy
+    vacancies_list = Vacancy.list_vacancies()
+
+    top_n = int(input("Введите количество вакансий для вывода в топ N: "))
     filter_words = input("Введите ключевые слова для фильтрации вакансий: ").split()
-    salary_threshold = get_valid_salary("Введите желаемую зарплату: ")
-    top_n = get_valid_integer("Введите количество вакансий для вывода в топ N: ")
+    salary_range = input("Введите диапазон зарплат: ")  # Пример: 100000 - 150000
 
-    vacancy_instances = Vacancy.cast_to_object_list(hh.vacancies)
+    #  Функция фильтрации вакансий по ключевым словам
+    filtered_vacancies = filter_vacancies(vacancies_list, filter_words)
 
-    filtered_vacancies = filter_vacancies(vacancy_instances, city_search, salary_threshold, filter_words)
+    #  Функция сортировки вакансий по зарплате
+    ranged_vacancies = get_vacancies_by_salary(filtered_vacancies, salary_range)
 
-    if not filtered_vacancies:
-        print("Вакансий с такими критериями не найдено.")
-        return []
+    #  Функция сортировки вакансий (вывод топ № вакансий)
+    top_vacancies = get_top_vacancies(ranged_vacancies, top_n)
 
-    save_vacancies(filtered_vacancies)
+    #  Функция вывода вакансий в консоль
+    print_vacancies(top_vacancies)
 
-    result_of_top = top_vacancy(top_n, filtered_vacancies)
+    # Пример работы контструктора класса с одной вакансией
+    vacancy = Vacancy(
+        "Python Developer",
+        "<https://hh.ru/vacancy/123456>",
+        "100 000-150 000 руб.",
+        "Требования: опыт работы от 3 лет...",
+    )
 
-    delete_vacancies_if_needed(filtered_vacancies)
+    # Vacancy.validate_salary()
+    # Сохранение информации о вакансиях в файл
+    json_saver = JSONSaver()
+    json_saver.add_vacancy(vacancy)
+    json_saver.delete_vacancy(vacancy)
 
-    display_vacancies()
-
-    return result_of_top
-
-
-def filter_vacancies(vacancy_instances, city_search, salary_threshold, filter_words):
-    """Функция для фильтрации вакансий по городу, зарплате и ключевым словам."""
-    res_city = [vacancy for vacancy in vacancy_instances if vacancy.city == city_search]
-    res_salary = [vacancy for vacancy in res_city if vacancy.salary_from >= salary_threshold]
-    return filter_vacancy(res_salary, filter_words)
-
-
-def save_vacancies(vacancies):
-    """Функция для сохранения отфильтрованных вакансий в файл."""
-    sd = HHVacancy()
-    sd.safe_vacancy(vacancies)
-
-
-def delete_vacancies_if_needed(vacancies):
-    """Функция для удаления вакансий по ключевым словам, если это необходимо."""
-    if input("Требуется что-нибудь удалить из файла? 'Да,Нет': ").lower() == 'да':
-        if not vacancies:
-            print("Нет вакансий для удаления.")
-        else:
-            words_del = input('Введите ключевые слова для удаления вакансий (Название вакансии, город и т.п): ')
-            sd = HHVacancy()
-            sd.delete_vacancy(words_del)
-
-
-def display_vacancies():
-    """Функция для выбора и отображения вакансий."""
-    fit_back = input("Требуется определенная выборка для вывода, или все данные из файла? 'Определенные,Все': ")
-    sd = HHVacancy()
-    if fit_back.lower() == 'определенные':
-        words_sample = input("Введите ключевое слово для выборки данных (Город, название вакансии и т.п): ")
-        vacancies = sd.vacancy_from_file(words_sample)
-        print(vacancies)
-    elif fit_back.lower() == "все":
-        vacancies = sd.full_data_from_file()
-        print(vacancies)
-
-
-def get_valid_salary(prompt):
-    """Функция для получения корректного ввода желаемой зарплаты"""
-    while True:
-        try:
-            return int(input(prompt))
-        except ValueError:
-            print("Пожалуйста, введите корректное целое число для зарплаты.")
-
-
-def get_valid_integer(prompt):
-    """Функция для получения корректного ввода целого числа"""
-    while True:
-        try:
-            return int(input(prompt))
-        except ValueError:
-            print("Пожалуйста, введите корректное целое число.")
+    #  циклом создаем каждый словарь обьектом класса Vacancy
+    for filtered_vacancy in [tuple(d.values()) for d in top_vacancies]:
+        vacancy_obj = Vacancy(*filtered_vacancy)
+        json_saver.add_vacancy(vacancy_obj)
 
 
 if __name__ == "__main__":
-    print(user_interaction())
-
-
-
+    user_interaction()

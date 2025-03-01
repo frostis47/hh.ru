@@ -1,79 +1,136 @@
 class Vacancy:
-    def __init__(self, name, salary_from, salary_to, requirements, city, url):
-        self.name = name
-        self.salary_from = salary_from
-        self.salary_to = salary_to
-        self.requirements = requirements
-        self.city = city
-        self.url = url
+    """Класс создания вакансии с параметрами"""
+    __list_vacancies: list = []
+    __slots__ = ("__name", "__url", "__snippet", "__salary")
+
+    def __init__(
+        self,
+        name: str = "Не указан",
+        url: str = "Не указан",
+        salary: str | None | dict = None,
+        snippet: str = "Не указан"
+
+    ):
+        """Конструктор инициализации объекта класса Vacancy (вакансия работника)"""
+        self.__name = name
+        self.__url = url
+        self.__snippet = snippet
+        self.__salary = self.__validate(salary)
+
+        dict_vacancy = {
+            "name": self.__name,
+            "url": self.__url,
+            "salary": self.__salary,
+            "snippet": self.__snippet
+        }
+        self.__list_vacancies.append(dict_vacancy)
+
+    @staticmethod
+    def __validate(salary):
+        """Метод валидации зарплаты"""
+        if salary is None:
+            return {"from": 0, "to": 0}
+        if isinstance(salary, str):
+            # Пытаемся распарсить строку зарплаты, например, "100000 - 150000"
+            try:
+                from_salary, to_salary = map(int, salary.split(" - "))
+                return {"from": from_salary, "to": to_salary}
+            except ValueError:
+                # Если парсинг не удался, возвращаем значения по умолчанию
+                return {"from": 0, "to": 0}
+        elif isinstance(salary, dict):
+            # Убеждаемся, что ключи 'from' и 'to' присутствуют
+            from_salary = salary.get('from', 0)
+            to_salary = salary.get('to', 0)
+            return {"from": from_salary, "to": to_salary}
+        else:
+            # Если тип данных неожиданный, возвращаем значения по умолчанию
+            return {"from": 0, "to": 0}
+
+    def __ge__(self, other):
+        """Метод сравнения вакансий по зарплате (верхний порог)"""
+        self_salary_to = self.__salary.get("to", 0)
+        other_salary_to = other.__salary.get("to", 0)
+        return self_salary_to >= other_salary_to
 
     @classmethod
-    def cast_to_object_list(cls, vacancies):
-        """Метод для преобразования списка словарей в список экземпляров класса Vacancy."""
-        vacancy_instances = []
-        for vacancy_info in vacancies:
-            try:
-                name = vacancy_info['name']
-                salary_info = vacancy_info.get('salary', {})
-                salary_from = salary_info.get('from', 0) if salary_info else 0
-                salary_to = salary_info.get('to', 0) if salary_info else 0
-                requirements = vacancy_info.get('requirements', [])
-                city = vacancy_info['area']['name']
-                url = vacancy_info['alternate_url']
+    def cast_to_object_list(cls, list_vacancies):
+        """Метод добавления вакансий из списка вакансий"""
+        for vacancy_data in list_vacancies:
+            # Валидируем зарплату
+            salary = cls.__validate(vacancy_data.get("salary"))
 
-                vacancy = cls(name, salary_from, salary_to, requirements, city, url)
-                vacancy_instances.append(vacancy)
-            except KeyError as e:
-                print(f"Пропущена вакансия из-за отсутствия ключа: {e} в данных: {vacancy_info}")
+            snippet = vacancy_data.get("snippet", "Не указан")
+            # Если сниппет является словарем, извлекаем требование
+            if isinstance(snippet, dict):
+                snippet = snippet.get("requirement", "")
 
-        return vacancy_instances
+            # Создаем экземпляр вакансии
+            cls(
+                name=vacancy_data.get("name", "Не указан"),
+                url=vacancy_data.get("url", "Не указан"),
+                salary=salary,
+                snippet=snippet,
+            )
+        return cls.__list_vacancies
 
-    def __repr__(self):
-        """Метод для представления экземпляра вакансии в виде строки."""
-        return (f"Vacancy(name={self.name}, salary_from={self.salary_from}, "
-                f"salary_to={self.salary_to}, requirements={self.requirements}, "
-                f"city={self.city}, url={self.url})")
+    @classmethod
+    def filtered_salary(cls, from_salary: int = 0, to_salary: int = float("inf")):
+        """Метод фильтрации вакансий по зарплате (от и до вилка)"""
+        for vacancies in cls.__list_vacancies:
+            if vacancies["salary"].get("from", 0) >= from_salary and vacancies["salary"]["to"] <= to_salary:
+                print(vacancies)
 
-    def to_json(self):
-        """Метод для преобразования экземпляра вакансии в словарь."""
-        return {
-            "name": self.name,
-            "city": self.city,
-            "salary": {
-                "from": self.salary_from,
-                "to": self.salary_to
-            },
-            "url": self.url,
-            "description": self.requirements
-        }
+    @classmethod
+    def list_vacancies(cls):
+        """Метод для получения всех вакансий"""
+        return cls.__list_vacancies
 
-    @staticmethod
-    def reform_file(data_hh):
-        """Метод для обработки JSON-ответа от сайта HH.ru."""
-        result = []
-        for i in data_hh:
-            salary_info = i.get("salary", {})
-            salary_from = salary_info.get("from", 0)
-            salary_to = salary_info.get("to", 0)
-            currency = salary_info.get("currency")
+    @classmethod
+    def clear_list(cls):
+        cls.__list_vacancies = []
 
-            if currency == 'RUR':
-                result.append({
-                    "name": i["name"],
-                    "city": i["area"]["name"],
-                    "salary": {"from": salary_from, "to": salary_to},
-                    "url": i["alternate_url"],
-                    "description": i["snippet"]["requirement"]
-                })
-        return result
+    @property
+    def name(self):
+        return self.__name
 
-    @staticmethod
-    def filter_city(vacancies, city):
-        """Метод фильтрации списка вакансий по нужному городу."""
-        return [vac for vac in vacancies if vac.city == city]
+    @property
+    def url(self):
+        return self.__url
 
-    @staticmethod
-    def filter_by_salary(vacancies, min_salary):
-        """Метод фильтрации списка вакансий по минимальной зарплате."""
-        return [vac for vac in vacancies if vac.salary_from >= min_salary]
+    @property
+    def salary(self):
+        return self.__salary
 
+    @property
+    def snippet(self):
+        return self.__snippet
+
+
+if __name__ == "__main__":
+    Vacancy.clear_list()
+    vacancy_data_list = [
+        {
+            "name": "Python Developer",
+            "url": "https://hh.ru/vacancy/123456",
+            "salary": "100000-150000",
+            "snippet": "Требования: опыт работы от 3 лет..."
+        },
+        {
+            "name": "Senior Python Developer",
+            "url": "https://hh.ru/vacancy/654321",
+            "salary": "150000-200000",
+            "snippet": "Требования: опыт работы от 5 лет..."
+        },
+        {
+            "name": "Junior Python Developer",
+            "url": "https://hh.ru/vacancy/234567",
+            "salary": None,
+            "snippet": "Требования: опыт работы от 1 года..."
+        },
+    ]
+
+    Vacancy.cast_to_object_list(vacancy_data_list)
+
+    Vacancy.filtered_salary(0, 150000)
+    print(Vacancy.list_vacancies())

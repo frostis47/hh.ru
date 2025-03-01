@@ -1,0 +1,65 @@
+[
+    {
+        "name": ".Net developer (Junior+)",
+        "url": "https://api.hh.ru/vacancies/117573940?host=hh.ru",
+        "salary": {
+            "from": 100000,
+            "to": 150000
+        },
+        "snippet": "Базовые знания .NET 7 и asp.net core. Понимание основ работы реляционных баз данных, опыт работы с PostgreSQL. Базовые навыки написания..."
+    },
+    {
+        "name": "Junior Java Developer",
+        "url": "https://api.hh.ru/vacancies/116857899?host=hh.ru",
+        "salary": {
+            "from": 120000,
+            "to": 150000
+        },
+        "snippet": "Опыт работы с системами контроля версий (Git). Базовые знания Java и понимание принципов ООП. Знание основ REST API. "
+    },
+    {
+        "name": "Junior Python-разработчик",
+        "url": "https://api.hh.ru/vacancies/116814674?host=hh.ru",
+        "salary": {
+            "from": 130000,
+            "to": 140000
+        },
+        "snippet": "...с облачными платформами (AWS, Azure, DigitalOcean и др.) приветствуется. Знания Python на базовом уровне и стремление развиваться как Python-<highlighttext>разработчик</highlighttext>."
+    },
+    {
+        "name": "Менеджер по продажам",
+        "url": "https://api.hh.ru/vacancies/117492699?host=hh.ru",
+        "salary": {
+            "from": 110000,
+            "to": 150000
+        },
+        "snippet": "Опыт работы в продажах от 1 года (желателен, но необязателен, рассматриваем начинающих специалистов). - Опыт работы в сегменте B2B..."
+    },
+    {
+        "name": "Менеджер по продажам / Консультант по работе с клиентами",
+        "url": "https://api.hh.ru/vacancies/117735811?host=hh.ru",
+        "salary": {
+            "from": 130000,
+            "to": 150000
+        },
+        "snippet": "Желателен опыт работы в продажах, так как понимание потребностей клиента и умение предложить подходящие решения будут вашей силой. "
+    },
+    {
+        "name": "Менеджер по оптовым продажам (строительный крепёж)",
+        "url": "https://api.hh.ru/vacancies/117677958?host=hh.ru",
+        "salary": {
+            "from": 100000,
+            "to": 150000
+        },
+        "snippet": "Опыта в продажах от 1 года, преимуществом будет опыт в оптовых продажах. Навык активного поиска клиентов также будет дополнительным преимуществом. "
+    },
+    {
+        "name": "Frontend-разработчик JavaScript/ JavaScript Developer (React)",
+        "url": "https://api.hh.ru/vacancies/117172861?host=hh.ru",
+        "salary": {
+            "from": 110000,
+            "to": 150000
+        },
+        "snippet": "Углубленные знания JavaScript, TypeScript. Коммерческий опыт разработки проектов с использованием React, Redux, redux-saga, reduxtoolkit, material-ui (от 2ух..."
+    }
+]
