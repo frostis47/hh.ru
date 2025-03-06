@@ -1,4 +1,5 @@
 import json
+import os.path
 
 from src.base_json_saver import BaseJsonSaver
 from src.vacancy import Vacancy
@@ -10,61 +11,41 @@ class JSONSaver(BaseJsonSaver):
     def __init__(self, file_saver: str = "data/filtered_vacancies.json"):
         """Констркутор, инициализирует путь до файла (для работы с ним)"""
         self.__file_saver = file_saver
+        if not os.path.exists(file_saver):
+            with open(file_saver, "w") as file:
+                json.dump([], file)
 
-    @staticmethod
-    def load_info_json(file_path):
+    def load_info_json(self):
         """Метод получения данных из файла"""
-        with open(file_path, encoding="utf-8") as file:
+        with open(self.__file_saver, encoding="utf-8") as file:
             json_file = json.load(file)
             return json_file
 
-    def add_vacancy(self, vacancies: Vacancy | dict):
+    def add_vacancy(self, vacancy: Vacancy):
         """Метод добавления вакансий в файл json"""
-        with open(self.__file_saver, "r+", encoding="utf-8") as file:
-            try:
-                json.load(file)
-            except json.JSONDecodeError:
-                file.write("[]")
-
-        with open(self.__file_saver, "r+", encoding="utf-8") as file:
-            json_file_vacancies = json.load(file)
-
-            dict_vacancy = {
-                "name": vacancies.name,
-                "url": vacancies.url,
-                "salary": vacancies.salary,
-                "snippet": vacancies.snippet,
-            }
-
-            if dict_vacancy not in json_file_vacancies:
-                json_file_vacancies.append(dict_vacancy)
-
+        old_vacancies = self.load_info_json()
+        dict_vacancy = vacancy.to_dict()
+        if dict_vacancy not in old_vacancies:
+            print("такая вакансия уже есть")
+            return
+        old_vacancies.append(dict_vacancy)
         with open(self.__file_saver, "w", encoding="utf-8") as file:
-            json.dump(json_file_vacancies, file, ensure_ascii=False, indent=4)
+            json.dump(old_vacancies, file, ensure_ascii=False, indent=4)
 
-    def delete_vacancy(self, vacancies: Vacancy):
+    def delete_vacancy(self, vacancy: Vacancy):
         """Метод удаления вакансий из файла json"""
-        with open(self.__file_saver, "r+", encoding="utf-8") as file:
-            json_file_vacancies = json.load(file)
+        old_vacancies: object = self.load_info_json()
+        dict_vacancy = vacancy.to_dict()
 
-            dict_vacancy = {
-                "name": vacancies.name,
-                "url": vacancies.url,
-                "salary": vacancies.salary,
-                "snippet": vacancies.snippet,
-            }
-
-            if dict_vacancy in json_file_vacancies:
-                json_file_vacancies.remove(dict_vacancy)
-
-        with open(self.__file_saver, "w", encoding="utf-8") as file:
-            json.dump(json_file_vacancies, file, ensure_ascii=False, indent=4)
+        if dict_vacancy in old_vacancies:
+            old_vacancies.remove(dict_vacancy)
+            with open(self.__file_saver, "w", encoding="utf-8") as file:
+                json.dump(old_vacancies, file, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":
-    vacancys = Vacancy("Python Developer", "<https://hh.ru/vacancy/123456>", "100000 - 130000",
-                       "Требования: опыт работы от 3 лет...")
+    vacancy = Vacancy("Python Developer", "<https://hh.ru/vacancy/123456>", "100000 - 130000",
+                      "Требования: опыт работы от 3 лет...")
 
     json_saver = JSONSaver("../data/filtered_vacancies.json")
-    json_saver.add_vacancy(vacancys)
-    # json_saver.delete_vacancy(vacancys)
+    json_saver.add_vacancy(vacancy)

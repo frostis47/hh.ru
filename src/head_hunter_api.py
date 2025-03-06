@@ -7,7 +7,7 @@ class HeadHunterAPI(BaseSaveFile, BaseLoadVacancies):
     """Класс получает информацию о вакансиях с сайта HeadHunter"""
 
     def __init__(self, file_worker: str = "data/json_vacancies.json"):
-        """Конструктор обьекта запроса инфо через API сервис"""
+        """Конструктор объекта запроса инфо через API сервис"""
 
         self.__url = "https://api.hh.ru/vacancies"
         self.__headers = {"User-Agent": "HH-User-Agent"}

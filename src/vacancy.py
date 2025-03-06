@@ -5,8 +5,8 @@ class Vacancy:
 
     def __init__(
         self,
-        name: str = "Не указан",
-        url: str = "Не указан",
+        name: str,
+        url: str,
         salary: str | None | dict = None,
         snippet: str = "Не указан"
 
@@ -14,34 +14,18 @@ class Vacancy:
         """Конструктор инициализации объекта класса Vacancy (вакансия работника)"""
         self.__name = name
         self.__url = url
-        self.__snippet = snippet
+        self.__snippet = snippet if snippet else "Не указан"
         self.__salary = self.__validate(salary)
 
-        dict_vacancy = {
-            "name": self.__name,
-            "url": self.__url,
-            "salary": self.__salary,
-            "snippet": self.__snippet
-        }
-        self.__list_vacancies.append(dict_vacancy)
+        self.__list_vacancies.append(self)
 
     @staticmethod
     def __validate(salary):
         """Метод валидации зарплаты"""
-        if salary is None:
-            return {"from": 0, "to": 0}
-        if isinstance(salary, str):
-            # Пытаемся распарсить строку зарплаты, например, "100000 - 150000"
-            try:
-                from_salary, to_salary = map(int, salary.split(" - "))
-                return {"from": from_salary, "to": to_salary}
-            except ValueError:
-                # Если парсинг не удался, возвращаем значения по умолчанию
-                return {"from": 0, "to": 0}
-        elif isinstance(salary, dict):
+        if isinstance(salary, dict):
             # Убеждаемся, что ключи 'from' и 'to' присутствуют
-            from_salary = salary.get('from', 0)
-            to_salary = salary.get('to', 0)
+            from_salary = salary["from"] if salary["from"] else 0
+            to_salary = salary["to"] if salary["to"] else 0
             return {"from": from_salary, "to": to_salary}
         else:
             # Если тип данных неожиданный, возвращаем значения по умолчанию
@@ -53,6 +37,31 @@ class Vacancy:
         other_salary_to = other.__salary.get("to", 0)
         return self_salary_to >= other_salary_to
 
+
+    def __lt__(self, other):
+        return (self.salary['from'], self.salary['to']) < (other.salary['from'], other.salary['to'])
+
+    def __str__(self):
+        name = self.name
+        url = self.url
+        salary_from = self.salary["from"]
+        salary_to= self.salary["to"]
+        snippet = self.snippet
+
+        if salary_from and salary_to:
+            salary_info = f"Зарплата от: {salary_from} до: {salary_to}"
+        elif not salary_to:
+            salary_info = f"Зарплата от: {salary_from}"
+        elif not salary_from:
+            salary_info = f"Зарплата до: {salary_to}"
+        else:
+            salary_info = f"Зарплата не указана"
+
+        return (f"Вакансия: {name}\n"
+                f"Ссылка: {url}\n"
+                f"Требования: {snippet}\n"
+                f"{salary_info}\n")
+
     @classmethod
     def cast_to_object_list(cls, list_vacancies):
         """Метод добавления вакансий из списка вакансий"""
@@ -61,14 +70,14 @@ class Vacancy:
             salary = cls.__validate(vacancy_data.get("salary"))
 
             snippet = vacancy_data.get("snippet", "Не указан")
-            # Если сниппет является словарем, извлекаем требование
+
             if isinstance(snippet, dict):
                 snippet = snippet.get("requirement", "")
 
             # Создаем экземпляр вакансии
-            cls(
-                name=vacancy_data.get("name", "Не указан"),
-                url=vacancy_data.get("url", "Не указан"),
+            instance = cls(
+                name=vacancy_data.get("name"),
+                url=vacancy_data.get("alternate_url"),
                 salary=salary,
                 snippet=snippet,
             )
@@ -106,6 +115,13 @@ class Vacancy:
     def snippet(self):
         return self.__snippet
 
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "url": self.url,
+            "salary": self.salary,
+            "snippet": self.snippet,
+        }
 
 if __name__ == "__main__":
     Vacancy.clear_list()

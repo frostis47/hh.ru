@@ -8,14 +8,8 @@ def filter_vacancies(vacancies_list: list, filter_words: list):
 
     for vacancy in vacancies_list:
         for word in filter_words:
-            name = vacancy.get("name", "")
-            snippet = vacancy.get("snippet", "")
-
-            # Ensure that name and snippet are strings
-            if not isinstance(name, str):
-                name = ""
-            if not isinstance(snippet, str):
-                snippet = ""
+            name = vacancy.name
+            snippet = vacancy.snippet
 
             if word.lower() in name.lower() or word.lower() in snippet.lower():
                 filtered_vacancies.append(vacancy)
@@ -37,28 +31,17 @@ def get_vacancies_by_salary(filtered_vacancies, salary_range):
         return []
 
     for vacancy in filtered_vacancies:
-        salary = vacancy.get("salary", {})
+        salary = vacancy.salary
         salary_from = salary.get("from")
         salary_to = salary.get("to")
 
-        # Check if salary_from and salary_to are not None
-        if salary_from is not None and salary_to is not None:
-            try:
-                salary_from = int(salary_from)
-                salary_to = int(salary_to)
-            except ValueError:
-                continue  # Skip if salary values are not numeric
 
-            if salary_from >= min_salary and salary_to <= max_salary:
-                filtered_salary_vacancies.append(vacancy)
-        else:
-            # Handle vacancies with missing salary information if necessary
-            continue  # Or you can include logic to handle these cases
+        if salary_from >= min_salary and salary_to <= max_salary:
+            filtered_salary_vacancies.append(vacancy)
 
-    # Sort vacancies by 'to' salary in descending order
+
     return sorted(
         filtered_salary_vacancies,
-        key=lambda x: x["salary"].get("to", 0),
         reverse=True
     )
 
@@ -71,7 +54,10 @@ def get_top_vacancies(filtered_vacancies, top_n):
 
 def print_vacancies(vacancies):
     """Функция вывода отфильтрованных вакансий в консоль"""
-    return print(vacancies)
+    for vac in vacancies:
+        print(vac)
+
+
 
 
 if __name__ == "__main__":
@@ -111,9 +97,9 @@ if __name__ == "__main__":
     filter_word = input("Введите ключевые слова для фильтрации вакансий: ").split()
     salary_rang = input("Введите диапазон зарплат: ")
 
-    filtered_vacanciess = filter_vacancies(my_list, filter_word)
+    filtered_vacancies = filter_vacancies(my_list, filter_word)
 
-    ranged_vacancies = get_vacancies_by_salary(filtered_vacanciess, salary_rang)
+    ranged_vacancies = get_vacancies_by_salary(filtered_vacancies, salary_rang)
 
     top_vacancies = get_top_vacancies(ranged_vacancies, top_)
 
